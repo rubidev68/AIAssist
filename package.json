@@ -1,0 +1,11 @@
+{
+  "name": "kaira",
+  "version": "1.0.0",
+  "description": "Conversational AI Assistant and Station based on GPT-4o",
+  "main": "base.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
