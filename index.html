@@ -1,0 +1,168 @@
+<html>
+
+<body>
+    <button id="speakBtn">Speak to AI</button>
+    <audio id="responseAudio" controls></audio>
+    <script>
+        let isUserInteracted = false;
+        let audioContext;
+        let mediaStream;
+        const ws = new WebSocket("ws://localhost:3000/api");
+
+        ws.onopen = () => {
+            console.log("WebSocket connection established with the server.");
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("Message received from server:", data);
+
+            if (data.type === 'transcript') {
+                console.log("Transcript received from server:", data.content);
+                // Display transcript to the user (e.g., append to a transcript UI element)
+            } else if (data.type === 'audio') {
+                console.log("Audio data received from server for playback.");
+
+                // Convert base64 to Blob
+                const binaryString = atob(data.content);
+                const binaryData = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    binaryData[i] = binaryString.charCodeAt(i);
+                }
+                const audioBlob = new Blob([binaryData], { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                // Set the audio source to the Blob URL
+                const audio = document.getElementById('responseAudio');
+                audio.src = audioUrl;
+
+                // Play audio and handle any errors
+                audio.play().catch(error => {
+                    console.error("Audio playback failed:", error);
+                });
+            } else {
+                console.log("Unexpected message type received:", data.type);
+            }
+        };
+
+
+        ws.onclose = () => {
+            console.log("WebSocket connection closed.");
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        function floatTo16BitPCM(float32Array) {
+            const buffer = new ArrayBuffer(float32Array.length * 2);
+            const view = new DataView(buffer);
+            for (let i = 0; i < float32Array.length; i++) {
+                let s = Math.max(-1, Math.min(1, float32Array[i]));
+                view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+            }
+            return buffer;
+        }
+
+        function base64EncodeAudio(float32Array) {
+            const pcmData = floatTo16BitPCM(float32Array);
+            let binary = '';
+            const bytes = new Uint8Array(pcmData);
+            bytes.forEach(b => (binary += String.fromCharCode(b)));
+            return btoa(binary);
+        }
+
+
+        // Function to check microphone permissions
+        async function checkMicrophonePermissions() {
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+                console.log("Microphone permission status:", permissionStatus.state);
+                if (permissionStatus.state === 'denied') {
+                    alert("Microphone access is blocked. Please allow access in your browser settings.");
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.warn("Could not check microphone permissions:", error);
+                return true; // Assume permissions are fine if we can't check
+            }
+        }
+
+        // Function to start audio processing
+        async function startAudioProcessing() {
+            console.log('Speak button clicked, initializing audio context and stream...');
+            isUserInteracted = true;
+
+            if (!audioContext || audioContext.state === 'closed') {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log("AudioContext successfully created.");
+            }
+
+            try {
+                const hasPermission = await checkMicrophonePermissions();
+                if (!hasPermission) return;
+
+                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access successful. MediaStream:', mediaStream);
+
+                const source = audioContext.createMediaStreamSource(mediaStream);
+
+                // VAD parameters
+                let silenceThreshold = 0.01; // Threshold for detecting silence
+                let silenceDuration = 1000; // Time in milliseconds to detect silence
+                let silenceStart = null;
+                let buffer = "";
+
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                processor.onaudioprocess = (e) => {
+                    const float32Array = e.inputBuffer.getChannelData(0);
+
+                    // Calculate the root mean square (RMS) level to measure volume
+                    const rms = Math.sqrt(float32Array.reduce((sum, sample) => sum + sample * sample, 0) / float32Array.length);
+
+                    // Detect silence if RMS is below threshold
+                    if (rms < silenceThreshold) {
+                        if (silenceStart === null) {
+                            silenceStart = Date.now(); // Start silence timer
+                        } else if (Date.now() - silenceStart > silenceDuration) {
+                            console.log("Silence detected. Stopping audio stream.");
+                            mediaStream.getTracks().forEach(track => track.stop()); // Stop capturing audio
+                            source.disconnect();
+                            processor.disconnect();
+                            isAudioStreamActive = false;
+                            //console.log(buffer);
+                            ws.send(buffer);
+                        }
+                    } else {
+                        silenceStart = null; // Reset silence timer if speaking
+                        if (ws.readyState === WebSocket.OPEN) {
+                            const audio = base64EncodeAudio(float32Array);
+                            buffer = buffer.concat(float32Array);
+                            console.log("Audio data added to buffer.");
+                        }
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+                console.log("Audio processing with ScriptProcessorNode started.");
+
+            } catch (error) {
+                if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+                    console.error("Microphone permission was denied or request was aborted.");
+                    alert("Please allow microphone access to use this feature.");
+                } else {
+                    console.error("Unexpected error initializing audio:", error);
+                }
+            }
+        }
+
+        // Start audio processing on button click
+        document.getElementById('speakBtn').onclick = () => {
+            startAudioProcessing();
+        };
+    </script>
+</body>
+
+</html>
