@@ -1,3 +1,4 @@
+// Required imports
 import fs from 'fs';
 import WebSocket from 'ws';
 import express from 'express';
@@ -14,21 +15,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 expressWs(app);
 
-// PCM encoding function
-const floatTo16BitPCM = (float32Array) => {
-    const buffer = new ArrayBuffer(float32Array.length * 2);
-    const view = new DataView(buffer);
-    for (let i = 0; i < float32Array.length; i++) {
-        const s = Math.max(-1, Math.min(1, float32Array[i]));
-        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    }
-    return buffer;
-};
-
+// WebSocket server setup
 app.get('/', (req, res) => res.sendFile("index.html", { root: __dirname }));
 app.ws('/api', (ws) => {
     console.log("Client connected to WebSocket /api endpoint.");
 
+    // Connection to OpenAI's Realtime API
     const openAIWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
         headers: {
             "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -36,7 +28,7 @@ app.ws('/api', (ws) => {
         },
     });
 
-    let audioBuffer = [];
+    let audioChunks = [];
 
     openAIWs.on('open', () => {
         console.log("Connected to OpenAI Realtime API.");
@@ -48,12 +40,17 @@ app.ws('/api', (ws) => {
 
     openAIWs.on('message', (data) => {
         const response = JSON.parse(data.toString());
+        
         if (response.type === 'response.audio_transcript.done') {
             ws.send(JSON.stringify({ type: 'transcript', content: response.transcript }));
         } else if (response.type === 'response.audio.delta') {
-            ws.send(JSON.stringify({ type: 'audio', content: response.delta }));
-        } else if (response.type === 'response.done') {
-            audioBuffer = []; // Clear buffer when the response is done
+            audioChunks.push(Buffer.from(response.delta));
+        } else if (response.type === 'response.done' && response.response.status === 'completed') {
+            ws.send(JSON.stringify({ type: 'audio', content: Buffer.concat(audioChunks).toString() }));
+            audioChunks = []; // Clear buffer for the next response
+        }
+        else {
+            console.log(response);
         }
     });
 
@@ -67,8 +64,9 @@ app.ws('/api', (ws) => {
                 content: [{ type: 'input_audio', audio: message }]
             }
         };
-
+        console.log("Sending message to OpenAI Realtime API.");
         openAIWs.send(JSON.stringify(event));
+        openAIWs.send(JSON.stringify({ type: 'response.create' }));
     });
 });
 

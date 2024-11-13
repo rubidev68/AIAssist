@@ -24,19 +24,11 @@
                 console.log("Audio data received from server for playback.");
 
                 // Convert base64 to Blob
-                const binaryString = atob(data.content);
-                const binaryData = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    binaryData[i] = binaryString.charCodeAt(i);
-                }
-                const audioBlob = new Blob([binaryData], { type: 'audio/wav' });
+                const audioBlob = base64ToWav(data.content); // Convert PCM16 to WAV
                 const audioUrl = URL.createObjectURL(audioBlob);
 
-                // Set the audio source to the Blob URL
                 const audio = document.getElementById('responseAudio');
                 audio.src = audioUrl;
-
-                // Play audio and handle any errors
                 audio.play().catch(error => {
                     console.error("Audio playback failed:", error);
                 });
@@ -44,7 +36,6 @@
                 console.log("Unexpected message type received:", data.type);
             }
         };
-
 
         ws.onclose = () => {
             console.log("WebSocket connection closed.");
@@ -72,6 +63,44 @@
             return btoa(binary);
         }
 
+        function base64ToWav(base64Audio) {
+            const binaryString = atob(base64Audio);
+            const pcmData = new Uint8Array(binaryString.length);
+
+            for (let i = 0; i < binaryString.length; i++) {
+                pcmData[i] = binaryString.charCodeAt(i);
+            }
+
+            // WAV file header for PCM16
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+
+            // RIFF chunk descriptor
+            view.setUint32(0, 0x52494646, false); // "RIFF"
+            view.setUint32(4, 36 + pcmData.length, true); // File size - 8
+            view.setUint32(8, 0x57415645, false); // "WAVE"
+
+            // FMT sub-chunk
+            view.setUint32(12, 0x666d7420, false); // "fmt "
+            view.setUint32(16, 16, true); // Subchunk1 size (16 for PCM)
+            view.setUint16(20, 1, true); // Audio format (1 for PCM)
+            view.setUint16(22, 1, true); // Number of channels (1 for mono)
+            view.setUint32(24, 24000, true); // Sample rate (24kHz)
+            view.setUint32(28, 24000 * 2, true); // Byte rate (sampleRate * channels * bytesPerSample)
+            view.setUint16(32, 2, true); // Block align (channels * bytesPerSample)
+            view.setUint16(34, 16, true); // Bits per sample (16 bits)
+
+            // DATA sub-chunk
+            view.setUint32(36, 0x64617461, false); // "data"
+            view.setUint32(40, pcmData.length, true); // Subchunk2 size
+
+            // Concatenate WAV header and PCM data
+            const wavBuffer = new Uint8Array(wavHeader.byteLength + pcmData.byteLength);
+            wavBuffer.set(new Uint8Array(wavHeader), 0);
+            wavBuffer.set(pcmData, wavHeader.byteLength);
+
+            return new Blob([wavBuffer], { type: 'audio/wav' });
+        }
 
         // Function to check microphone permissions
         async function checkMicrophonePermissions() {
@@ -87,6 +116,17 @@
                 console.warn("Could not check microphone permissions:", error);
                 return true; // Assume permissions are fine if we can't check
             }
+        }
+
+        // Function to resample audio to 24000Hz
+        async function resampleAudio(audioBuffer, targetSampleRate) {
+            const offlineContext = new OfflineAudioContext(1, audioBuffer.length * targetSampleRate / audioBuffer.sampleRate, targetSampleRate);
+            const bufferSource = offlineContext.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.connect(offlineContext.destination);
+            bufferSource.start(0);
+            const renderedBuffer = await offlineContext.startRendering();
+            return renderedBuffer;
         }
 
         // Function to start audio processing
@@ -112,10 +152,10 @@
                 let silenceThreshold = 0.01; // Threshold for detecting silence
                 let silenceDuration = 1000; // Time in milliseconds to detect silence
                 let silenceStart = null;
-                let buffer = "";
+                let audioBuffer = [];
 
                 const processor = audioContext.createScriptProcessor(4096, 1, 1);
-                processor.onaudioprocess = (e) => {
+                processor.onaudioprocess = async (e) => {
                     const float32Array = e.inputBuffer.getChannelData(0);
 
                     // Calculate the root mean square (RMS) level to measure volume
@@ -131,16 +171,22 @@
                             source.disconnect();
                             processor.disconnect();
                             isAudioStreamActive = false;
-                            //console.log(buffer);
-                            ws.send(buffer);
+
+                            // Resample the recorded audio buffer to 24000Hz
+                            const audioBufferToResample = audioContext.createBuffer(1, audioBuffer.length, audioContext.sampleRate);
+                            audioBufferToResample.copyToChannel(new Float32Array(audioBuffer), 0);
+                            const resampledBuffer = await resampleAudio(audioBufferToResample, 24000);
+
+                            // Send the resampled audio buffer to the server
+                            const float32Array = resampledBuffer.getChannelData(0);
+                            const audioBase64 = base64EncodeAudio(float32Array);
+                            ws.send(JSON.stringify({ type: 'audio', content: audioBase64 }));
+                            console.log("Resampled audio buffer sent to server.");
                         }
                     } else {
                         silenceStart = null; // Reset silence timer if speaking
-                        if (ws.readyState === WebSocket.OPEN) {
-                            const audio = base64EncodeAudio(float32Array);
-                            buffer = buffer.concat(float32Array);
-                            console.log("Audio data added to buffer.");
-                        }
+                        audioBuffer.push(...float32Array); // Append audio data to buffer
+                        console.log("Audio data added to buffer.");
                     }
                 };
 
