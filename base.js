@@ -40,19 +40,21 @@ app.ws('/api', (ws) => {
 
     openAIWs.on('message', (data) => {
         const response = JSON.parse(data.toString());
-        
+
         if (response.type === 'response.audio_transcript.done') {
             ws.send(JSON.stringify({ type: 'transcript', content: response.transcript }));
         } else if (response.type === 'response.audio.delta') {
-            audioChunks.push(Buffer.from(response.delta));
+            console.log(response);
+            // Stream each delta audio chunk to the client immediately
+            ws.send(JSON.stringify({ type: 'audio', content: response.delta.toString() }));
         } else if (response.type === 'response.done' && response.response.status === 'completed') {
-            ws.send(JSON.stringify({ type: 'audio', content: Buffer.concat(audioChunks).toString() }));
-            audioChunks = []; // Clear buffer for the next response
-        }
-        else {
+            console.log("Response streaming completed.");
+            audioChunks = []; // Clear buffer for next response if needed
+        } else {
             console.log(response);
         }
     });
+
 
     ws.on('message', (message) => {
 

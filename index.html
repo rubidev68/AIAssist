@@ -13,6 +13,10 @@
             console.log("WebSocket connection established with the server.");
         };
 
+        let audioBufferQueue = [];
+        let audioBufferSourceNode;
+        let isPlaying = false;
+
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log("Message received from server:", data);
@@ -27,15 +31,46 @@
                 const audioBlob = base64ToWav(data.content); // Convert PCM16 to WAV
                 const audioUrl = URL.createObjectURL(audioBlob);
 
-                const audio = document.getElementById('responseAudio');
-                audio.src = audioUrl;
-                audio.play().catch(error => {
-                    console.error("Audio playback failed:", error);
-                });
+                fetch(audioUrl)
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                    .then(decodedData => {
+                        audioBufferQueue.push(decodedData);
+                        playNextAudio();
+                    });
             } else {
                 console.log("Unexpected message type received:", data.type);
             }
         };
+
+        function playNextAudio() {
+            if (isPlaying || audioBufferQueue.length === 0) return;
+
+            isPlaying = true;
+            const audioBuffer = audioBufferQueue.shift();
+
+            if (!audioBufferSourceNode || audioBufferSourceNode.playbackState === audioBufferSourceNode.FINISHED_STATE) {
+                audioBufferSourceNode = audioContext.createBufferSource();
+                audioBufferSourceNode.buffer = audioBuffer;
+                audioBufferSourceNode.connect(audioContext.destination);
+                audioBufferSourceNode.start(0);
+                audioBufferSourceNode.onended = () => {
+                    isPlaying = false;
+                    playNextAudio();
+                };
+            } else {
+                const newBuffer = audioContext.createBuffer(
+                    1,
+                    audioBufferSourceNode.buffer.length + audioBuffer.length,
+                    audioContext.sampleRate
+                );
+
+                newBuffer.getChannelData(0).set(audioBufferSourceNode.buffer.getChannelData(0));
+                newBuffer.getChannelData(0).set(audioBuffer.getChannelData(0), audioBufferSourceNode.buffer.length);
+
+                audioBufferSourceNode.buffer = newBuffer;
+            }
+        }
 
         ws.onclose = () => {
             console.log("WebSocket connection closed.");
