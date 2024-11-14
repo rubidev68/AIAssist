@@ -11,11 +11,30 @@
 
         ws.onopen = () => {
             console.log("WebSocket connection established with the server.");
+            
         };
 
         let audioBufferQueue = [];
         let audioBufferSourceNode;
         let isPlaying = false;
+
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'fr-FR';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                console.log("Detected speech:", transcript);
+
+                if (transcript.toLowerCase() === "cher assistant") {
+                    console.log("Activation keyword detected!");
+                    recognition.stop();
+                    startAudioProcessing(); // Start audio processing when keyword is detected
+                }
+            };
+
+            recognition.start();
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -44,7 +63,14 @@
         };
 
         function playNextAudio() {
-            if (isPlaying || audioBufferQueue.length === 0) return;
+            if (isPlaying ) {
+                return;
+            }
+            else if (audioBufferQueue.length== 0){
+                console.log("No audio data in the queue.");
+                recognition.start();
+                return;
+            }
 
             isPlaying = true;
             const audioBuffer = audioBufferQueue.shift();
