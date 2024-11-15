@@ -1,0 +1,119 @@
+.weather-base-removebg-preview-icon1 {
+  height: 90px;
+  width: 87px;
+  position: relative;
+  object-fit: cover;
+}
+.blank-line1,
+.blank-line2,
+.c1,
+.cloudy {
+  margin: 0;
+}
+.date-txt2 {
+  line-break: anywhere;
+  width: 100%;
+}
+.date2 {
+  height: 74px;
+  width: 59px;
+  position: relative;
+  line-height: 9px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.weather-wrapper,
+.weather1 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.weather1 {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  border-radius: var(--br-3xs);
+  background-color: var(--color-aliceblue);
+  padding: var(--padding-2xl) var(--padding-lgi) var(--padding-base);
+  gap: var(--gap-3xs);
+  z-index: 1;
+}
+.weather-wrapper {
+  padding: 0 237px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.order1 {
+  width: 136px;
+  position: relative;
+  font-weight: 500;
+  display: inline-block;
+}
+.todo-show-weather {
+  margin: 0;
+}
+.transcript1 {
+  width: 748px;
+  position: relative;
+  font-weight: 500;
+  display: inline-block;
+  max-width: 100%;
+}
+.request1,
+.weatherdetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  color: var(--color-dimgray);
+  font-family: var(--font-roboto);
+}
+.request1 {
+  align-self: stretch;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: var(--br-3xs);
+  background-color: var(--color-aliceblue);
+  overflow: hidden;
+  padding: var(--padding-4xl) var(--padding-xl) 322px var(--padding-6xl);
+  gap: var(--gap-3xl);
+  max-width: 100%;
+  margin-top: -41px;
+  text-align: left;
+  font-size: var(--font-size-xl);
+}
+.weatherdetails {
+  width: 862px;
+  position: relative;
+  padding: var(--padding-11xs) 0 0;
+  line-height: normal;
+  letter-spacing: normal;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  text-align: center;
+  font-size: var(--font-size-lg);
+}
+@media screen and (max-width: 700px) {
+  .weather-wrapper {
+    padding-left: var(--padding-xl);
+    padding-right: var(--padding-xl);
+    box-sizing: border-box;
+  }
+  .order1,
+  .transcript1 {
+    font-size: var(--font-size-base);
+  }
+  .request1 {
+    padding-bottom: 209px;
+    box-sizing: border-box;
+  }
+}
+@media screen and (max-width: 450px) {
+  .weather-wrapper {
+    padding-left: var(--padding-99xl);
+    padding-right: var(--padding-99xl);
+    box-sizing: border-box;
+  }
+}
