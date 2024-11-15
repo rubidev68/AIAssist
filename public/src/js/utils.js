@@ -257,7 +257,7 @@ function displayCurrentArticles() {
                 if (descElement) {
                     const containerHeight = articleContainer.clientHeight;
                     const titleHeight = titleElement.clientHeight;
-                    const availableSpace = containerHeight - titleHeight - 40;
+                    const availableSpace = containerHeight - titleHeight - 45;
 
                     if (availableSpace >= 40) {
                         descElement.textContent = article.description;
@@ -292,4 +292,64 @@ function initPhotoSlider() {
     }
 
     setInterval(nextSlide, 10000);
+}
+
+function openAIContainer() {
+    var popup = document.getElementById("vocalChatPopup");
+    if (!popup) return;
+
+    popup.style.display = "flex";
+    popup.style.zIndex = 100;
+
+    // Déclencher l'animation après un court délai
+    requestAnimationFrame(() => {
+        popup.classList.add('show');
+    });
+
+    popup.setAttribute("closable", "");
+
+    var onClick = function (event) {
+        if (event.target === popup && popup.hasAttribute("closable")) {
+            popup.classList.remove('show');
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 300);
+        }
+    };
+
+    popup.addEventListener("click", onClick);
+    updateAIOrderText('Speak now...');
+    updateAITranscriptText("Listening...")
+    startAudioProcessing();
+}
+
+function updateTextWithAnimation(element, newText, append = false) {
+    if (append) {
+        element.classList.add('fade-out');
+        setTimeout(() => {
+            element.textContent += newText;
+            element.classList.remove('fade-out');
+            element.classList.add('fade-in');
+        }, 500); // Correspond à la durée de l'animation fade-out
+    } else {
+        element.classList.add('fade-out');
+        setTimeout(() => {
+            element.textContent = newText;
+            element.classList.remove('fade-out');
+            element.classList.add('fade-in');
+        }, 500); // Correspond à la durée de l'animation fade-out
+    }
+    setTimeout(() => {
+        element.classList.remove('fade-in');
+    }, 1000); // Correspond à la durée totale des animations
+}
+
+function updateAIOrderText(newText) {
+    var orderElement = document.querySelector('.order');
+    updateTextWithAnimation(orderElement, newText);
+}
+
+function updateAITranscriptText(newText, append = false) {
+    var transcriptElement = document.querySelector('.transcript-txt');
+    updateTextWithAnimation(transcriptElement, newText, append);
 }

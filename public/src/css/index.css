@@ -216,10 +216,8 @@
   gap: 15px;
 }
 .date-p {
+  width:100%;
   margin: 0;
-}
-.date-txt {
-  width: 100%;
 }
 .date {
   height: 74px;
@@ -254,13 +252,10 @@
   object-fit: cover;
   transform: scale(0.80);
 }
-.c,
 .weather-txt {
-  margin: 0;
-}
-.date-txt1 {
   line-break: anywhere;
   width: 100%;
+  margin: 0;
 }
 .date1 {
   height: 74px;
@@ -614,9 +609,7 @@
   font-weight: 500;
   display: inline-block;
 }
-.blank-line,
-.lorem-ipsum-dolor,
-.this-is-an {
+.transcript-txt {
   margin: 0;
 }
 .transcript {

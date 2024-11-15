@@ -43,28 +43,10 @@ if (weatherContainer) {
 var aIContainer = document.getElementById("aIContainer");
 if (aIContainer) {
     aIContainer.addEventListener("click", function () {
-        var popup = document.getElementById("vocalChatPopup");
-        if (!popup) return;
-
-        popup.style.display = "flex";
-        popup.style.zIndex = 100;
-
-        // Déclencher l'animation après un court délai
-        requestAnimationFrame(() => {
-            popup.classList.add('show');
-        });
-
-        popup.setAttribute("closable", "");
-
-        var onClick = function (event) {
-            if (event.target === popup && popup.hasAttribute("closable")) {
-                popup.classList.remove('show');
-                setTimeout(() => {
-                    popup.style.display = "none";
-                }, 300);
-            }
-        };
-
-        popup.addEventListener("click", onClick);
+        openAIContainer();
     });
 }
+
+document.getElementById('ai-btn-2').onclick = () => {
+    startAudioProcessing();
+};

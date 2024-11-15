@@ -13,10 +13,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use("/", express.static(path.join(__dirname, 'public')));
 expressWs(app);
 
 // WebSocket server setup
-app.get('/', (req, res) => res.sendFile("index.html", { root: __dirname }));
+app.get('/', (req, res) => res.sendFile("./index.html", { root: __dirname }));
 app.ws('/api', (ws) => {
     console.log("Client connected to WebSocket /api endpoint.");
 
@@ -32,17 +33,14 @@ app.ws('/api', (ws) => {
 
     openAIWs.on('open', () => {
         console.log("Connected to OpenAI Realtime API.");
-        openAIWs.send(JSON.stringify({
-            type: "session.update",
-            session: { input_audio_transcription: { model: "whisper-1" } },
-        }));
+        
     });
 
     openAIWs.on('message', (data) => {
         const response = JSON.parse(data.toString());
 
-        if (response.type === 'response.audio_transcript.done') {
-            ws.send(JSON.stringify({ type: 'transcript', content: response.transcript }));
+        if (response.type === 'response.audio_transcript.delta') {
+            ws.send(JSON.stringify({ type: 'transcript', content: response.delta }));
         } else if (response.type === 'response.audio.delta') {
             console.log(response);
             // Stream each delta audio chunk to the client immediately
