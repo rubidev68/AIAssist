@@ -1,3 +1,9 @@
+let allArticles = []; // Stockage de tous les articles du flux
+let currentArticleIndex = 0; // Index de début pour l'affichage
+
+let weather_dataAI = null;
+let articles_dataAI = null;
+
 function setDateToParagraph(paragraphId) {
     const paragraph = document.getElementById(paragraphId);
     if (!paragraph) {
@@ -74,6 +80,7 @@ function getUserLocationAndWeather() {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     getWeather(latitude, longitude).then(weather_data => {
+                        weather_dataAI = weather_data;
                         resolve({ latitude, longitude, weather_data });
                     }).catch(error => reject(error));
                 },
@@ -87,6 +94,7 @@ function getUserLocationAndWeather() {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
                     getWeather(latitude, longitude).then(weather_data => {
+                        weather_dataAI = weather_data;
                         localStorage.setItem('locationPermission', 'granted');
                         resolve({ latitude, longitude, weather_data });
                     }).catch(error => reject(error));
@@ -178,6 +186,7 @@ async function fetchRSSFeed() {
     try {
         const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
         const data = await response.text();
+        articles_dataAI = data;
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'application/xml');
         return xmlDoc;
@@ -186,9 +195,6 @@ async function fetchRSSFeed() {
         return null;
     }
 }
-
-let allArticles = []; // Stockage de tous les articles du flux
-let currentArticleIndex = 0; // Index de début pour l'affichage
 
 function updateNewsArticles(xmlDoc) {
     const items = xmlDoc.getElementsByTagName('item');
@@ -276,6 +282,7 @@ function displayCurrentArticles() {
 
 async function updateNews() {
     const xmlDoc = await fetchRSSFeed();
+    
     if (xmlDoc) {
         updateNewsArticles(xmlDoc);
     }
@@ -352,4 +359,22 @@ function updateAIOrderText(newText) {
 function updateAITranscriptText(newText, append = false) {
     var transcriptElement = document.querySelector('.transcript-txt');
     updateTextWithAnimation(transcriptElement, newText, append);
+}
+
+function AIgetsNews() {
+    if (articles_dataAI) {
+        return JSON.stringify(articles_dataAI);
+    }
+    else {
+        return "No news available";
+    }
+}
+
+function AIgetsWeather() {
+    if (weather_dataAI) {
+        return JSON.stringify(weather_dataAI);
+    }
+    else {
+        return "No weather available";
+    }
 }

@@ -52,6 +52,12 @@ ws.onmessage = (event) => {
                 audioBufferQueue.push(decodedData);
                 playNextAudio();
             });
+    } else if (data.type == "request"){
+        console.log("Request received from server");
+        let result = eval(data.function + "()");
+        console.log("Function result:", result);
+        ws.send(JSON.stringify({ type: 'function', call_id:data.call_id, content: result }));
+        
     } else {
         console.log("Unexpected message type received:", data.type);
     }
