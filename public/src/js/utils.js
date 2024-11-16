@@ -4,6 +4,8 @@ let currentArticleIndex = 0; // Index de début pour l'affichage
 let weather_dataAI = null;
 let articles_dataAI = null;
 
+var converter = new showdown.Converter();
+
 function setDateToParagraph(paragraphId) {
     const paragraph = document.getElementById(paragraphId);
     if (!paragraph) {
@@ -302,6 +304,7 @@ function initPhotoSlider() {
 }
 
 function openAIContainer() {
+    recognition.stop();
     var popup = document.getElementById("vocalChatPopup");
     if (!popup) return;
 
