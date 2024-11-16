@@ -8,6 +8,8 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { type } from 'os';
 
+import { createProxyMiddleware } from 'http-proxy-middleware';'http-proxy-middleware';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +18,20 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use("/", express.static(path.join(__dirname, 'public')));
 expressWs(app);
+
+// Proxy server setup
+app.use('/proxy', createProxyMiddleware({
+    target: 'https://www.bbc.com',
+    changeOrigin: true,
+    pathRewrite: {
+        '^/proxy': '',
+    },
+    onProxyRes: function (proxyRes, req, res) {
+        // Supprimer les en-têtes restrictifs
+        delete proxyRes.headers['x-frame-options'];
+        delete proxyRes.headers['content-security-policy'];
+    }
+}));
 
 // WebSocket server setup
 app.get('/', (req, res) => res.sendFile("./index.html", { root: __dirname }));

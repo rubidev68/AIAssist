@@ -911,3 +911,18 @@
 .popup-overlay.show .vocalchat {
   transform: scale(1);
 }
+
+.newsdetails {
+  width: 80%;
+  height: 80%;
+  background-color: white;
+  border-radius: var(--br-3xs);
+  overflow: hidden;
+  position: relative;
+}
+
+.newsdetails iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
