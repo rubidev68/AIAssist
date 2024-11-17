@@ -36,7 +36,7 @@ app.use('/proxy', createProxyMiddleware({
 // WebSocket server setup
 app.get('/', (req, res) => res.sendFile("./index.html", { root: __dirname }));
 app.ws('/api', (ws) => {
-    console.log("Client connected to WebSocket /api endpoint.");
+    //console.log("Client connected to WebSocket /api endpoint.");
 
     // Connection to OpenAI's Realtime API
     const openAIWs = new WebSocket('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01', {
@@ -49,7 +49,7 @@ app.ws('/api', (ws) => {
     let audioChunks = [];
 
     openAIWs.on('open', () => {
-        console.log("Connected to OpenAI Realtime API.");
+        //console.log("Connected to OpenAI Realtime API.");
         openAIWs.send(JSON.stringify({
             type: "session.update",
             session: {
@@ -81,16 +81,16 @@ app.ws('/api', (ws) => {
             // Stream each delta audio chunk to the client immediately
             ws.send(JSON.stringify({ type: 'audio', content: response.delta.toString() }));
         } else if (response.type === 'response.done' && response.response.status === 'completed') {
-            console.log("Response streaming completed.");
+            //console.log("Response streaming completed.");
             audioChunks = []; // Clear buffer for next response if needed
         } else if (response.type === 'response.function_call_arguments.done') {
             let functionName = response.name;
             let call_id = response.call_id;
-            console.log("Function call request for function: ", functionName);
+            //console.log("Function call request for function: ", functionName);
             ws.send(JSON.stringify({ type: 'request', call_id: call_id, function: functionName }));
             
         } else {
-            console.log(response);
+            //console.log(response);
         }
     });
 
@@ -106,12 +106,12 @@ app.ws('/api', (ws) => {
                     content: [{ type: 'input_audio', audio: response.content }]
                 }
             };
-            console.log("Sending message to OpenAI Realtime API.");
+            //console.log("Sending message to OpenAI Realtime API.");
             openAIWs.send(JSON.stringify(event));
             openAIWs.send(JSON.stringify({ type: 'response.create' }));
         }
         else if (response.type == "function"){
-            console.log("Function call request done: ", response.content);
+            //console.log("Function call request done: ", response.content);
             const event = {
                 type: 'conversation.item.create',
                 item: {
@@ -120,7 +120,7 @@ app.ws('/api', (ws) => {
                     output: response.content,
                 }
             };
-            console.log("Sending function response to OpenAI Realtime API.");
+            //console.log("Sending function response to OpenAI Realtime API.");
             openAIWs.send(JSON.stringify(event));
             openAIWs.send(JSON.stringify({ type: 'response.create' }));
         }

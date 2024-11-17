@@ -4,7 +4,7 @@ let mediaStream;
 const ws = new WebSocket("ws://localhost:3000/api");
 
 ws.onopen = () => {
-    console.log("WebSocket connection established with the server.");
+    //console.log("WebSocket connection established with the server.");
 
 };
 
@@ -19,10 +19,10 @@ recognition.lang = 'en-EN';
 
 recognition.onresult = (event) => {
     const transcript = event.results[event.results.length - 1][0].transcript.trim();
-    console.log("Detected speech:", transcript);
+    //console.log("Detected speech:", transcript);
 
     if (transcript.toLowerCase().includes("assist")) {
-        console.log("Activation keyword detected!");
+        //console.log("Activation keyword detected!");
         recognition.stop();
         openAIContainer();
     }
@@ -32,14 +32,14 @@ recognition.start();
 
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    console.log("Message received from server:", data);
+    //console.log("Message received from server:", data);
     updateAIOrderText('Speaking...');
 
     if (data.type === 'transcript') {
-        console.log("Transcript received from server:", data.content);
+        //console.log("Transcript received from server:", data.content);
         updateAITranscriptText(data.content, true);
     } else if (data.type === 'audio') {
-        console.log("Audio data received from server for playback.");
+        //console.log("Audio data received from server for playback.");
 
         // Convert base64 to Blob
         const audioBlob = base64ToWav(data.content); // Convert PCM16 to WAV
@@ -53,13 +53,13 @@ ws.onmessage = (event) => {
                 playNextAudio();
             });
     } else if (data.type == "request"){
-        console.log("Request received from server");
+        //console.log("Request received from server");
         let result = eval(data.function + "()");
-        console.log("Function result:", result);
+        //console.log("Function result:", result);
         ws.send(JSON.stringify({ type: 'function', call_id:data.call_id, content: result }));
         
     } else {
-        console.log("Unexpected message type received:", data.type);
+        //console.log("Unexpected message type received:", data.type);
     }
 };
 
@@ -68,7 +68,7 @@ function playNextAudio() {
         return;
     }
     else if (audioBufferQueue.length == 0) {
-        console.log("No audio data in the queue.");
+        //console.log("No audio data in the queue.");
         updateAIOrderText('Speak now...');
         startAudioProcessing();
         return;
@@ -101,7 +101,7 @@ function playNextAudio() {
 }
 
 ws.onclose = () => {
-    console.log("WebSocket connection closed.");
+    //console.log("WebSocket connection closed.");
 };
 
 ws.onerror = (error) => {
@@ -169,7 +169,7 @@ function base64ToWav(base64Audio) {
 async function checkMicrophonePermissions() {
     try {
         const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-        console.log("Microphone permission status:", permissionStatus.state);
+        //console.log("Microphone permission status:", permissionStatus.state);
         if (permissionStatus.state === 'denied') {
             alert("Microphone access is blocked. Please allow access in your browser settings.");
             return false;
@@ -194,12 +194,12 @@ async function resampleAudio(audioBuffer, targetSampleRate) {
 
 // Function to start audio processing
 async function startAudioProcessing() {
-    console.log('Speak button clicked, initializing audio context and stream...');
+    //console.log('Speak button clicked, initializing audio context and stream...');
     isUserInteracted = true;
 
     if (!audioContext || audioContext.state === 'closed') {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        console.log("AudioContext successfully created.");
+        //console.log("AudioContext successfully created.");
     }
 
     try {
@@ -207,7 +207,7 @@ async function startAudioProcessing() {
         if (!hasPermission) return;
 
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log('Microphone access successful. MediaStream:', mediaStream);
+        //console.log('Microphone access successful. MediaStream:', mediaStream);
 
         const source = audioContext.createMediaStreamSource(mediaStream);
 
@@ -229,7 +229,7 @@ async function startAudioProcessing() {
                 if (silenceStart === null) {
                     silenceStart = Date.now(); // Start silence timer
                 } else if (Date.now() - silenceStart > silenceDuration) {
-                    console.log("Silence detected. Stopping audio stream.");
+                    //console.log("Silence detected. Stopping audio stream.");
                     mediaStream.getTracks().forEach(track => track.stop()); // Stop capturing audio
                     source.disconnect();
                     processor.disconnect();
@@ -244,20 +244,20 @@ async function startAudioProcessing() {
                     const float32Array = resampledBuffer.getChannelData(0);
                     const audioBase64 = base64EncodeAudio(float32Array);
                     ws.send(JSON.stringify({ type: 'audio', content: audioBase64 }));
-                    console.log("Resampled audio buffer sent to server.");
+                    //console.log("Resampled audio buffer sent to server.");
                     updateAIOrderText('Waiting for response...');
                     updateAITranscriptText("")
                 }
             } else {
                 silenceStart = null; // Reset silence timer if speaking
                 audioBuffer.push(...float32Array); // Append audio data to buffer
-                console.log("Audio data added to buffer.");
+                //console.log("Audio data added to buffer.");
             }
         };
 
         source.connect(processor);
         processor.connect(audioContext.destination);
-        console.log("Audio processing with ScriptProcessorNode started.");
+        //console.log("Audio processing with ScriptProcessorNode started.");
 
     } catch (error) {
         if (error.name === 'NotAllowedError' || error.name === 'AbortError') {

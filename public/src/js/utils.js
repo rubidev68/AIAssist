@@ -52,14 +52,14 @@ function updateClock() {
 function computeWeather() {
     getUserLocationAndWeather().then(({ latitude, longitude, weather_data }) => {
         console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-        console.log(weather_data);
+        //console.log(weather_data);
         temperatures = weather_data.daily.temperature_2m_max;
         const temperature = Math.round(temperatures.reduce((a, b) => a + b) / temperatures.length);
         const weather = weather_data.daily.weather_code[0];
         const weatherDescription = getWeatherDescription(weather);
 
         console.log(`Temperature: ${temperature}°C`);
-        console.log(`Weather Code: ${weather}`);
+        //console.log(`Weather Code: ${weather}`);
         console.log(`Weather: ${weatherDescription}`);
 
         setWeatherToParagraph('weather-p', weatherDescription, temperature);
