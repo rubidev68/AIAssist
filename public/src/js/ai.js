@@ -1,7 +1,10 @@
 let isUserInteracted = false;
 let audioContext;
 let mediaStream;
-const ws = new WebSocket("ws://"+window.location.host+"/api");
+// Déterminer automatiquement le protocole WebSocket en fonction du protocole de la page
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsHost = window.location.host;
+const ws = new WebSocket(`${wsProtocol}//${wsHost}/api`);
 
 ws.onopen = () => {
     //console.log("WebSocket connection established with the server.");
