@@ -78,7 +78,13 @@ document.addEventListener("DOMContentLoaded", function () {
         // Vérifiez le mot de passe avec le hash stocké
         if (hashedPassword === storedHashedPassword) {
             loginPopup.style.display = "none";
-            recognition.start();
+            try{
+                recognition.start();
+            }
+            catch (e) {
+                
+            }
+            
         } else {
             errorMessage.style.display = "block";
         }
