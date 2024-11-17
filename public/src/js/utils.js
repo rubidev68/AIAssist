@@ -201,7 +201,7 @@ async function fetchRSSFeed() {
 
     try {
         const response = await fetch(proxyUrl + rssUrl, {
-            mode: 'cors'
+            mode: 'no-cors'
         });
         const data = await response.text();
         articles_dataAI = data;
