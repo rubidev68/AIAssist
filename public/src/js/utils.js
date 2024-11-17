@@ -195,14 +195,11 @@ function setWeatherIcon(weatherIconStr, weatherDescription) {
 
 
 async function fetchRSSFeed() {
-    let proxyUrl = 'https://' + window.location.host + '/proxy/';
-    let rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
-    rssUrl = rssUrl.replace(/^https?:\/\/[^/]+/, "");
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
 
     try {
-        const response = await fetch(proxyUrl + rssUrl, {
-            mode: 'no-cors'
-        });
+        const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
         const data = await response.text();
         articles_dataAI = data;
         const parser = new DOMParser();
@@ -210,6 +207,7 @@ async function fetchRSSFeed() {
         return xmlDoc;
     } catch (error) {
         console.error('Erreur lors de la récupération du flux RSS:', error);
+        return null;
     }
 }
 
