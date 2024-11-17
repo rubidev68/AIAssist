@@ -182,7 +182,7 @@ function setWeatherIcon(weatherIconStr, weatherDescription) {
         'Sleet': 'rain.png',
         'Snow': 'snow.svg',
         'Grainy': 'grainy.svg',
-        'Showers': 'showers.svg',
+        'Showers': 'rain.png',
         'Blizzard': 'blizzard.svg',
         'Thunder': 'thunder.svg',
         'Storm': 'storm.svg',

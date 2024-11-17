@@ -1,5 +1,4 @@
-# KAIRA
-## Conversational AI Assistant and Station based on GPT-4o
+# Conversational AI Assistant and Station based on GPT-4o Realtime API
 
 ### Installation
 #### 1.Clone repo
@@ -24,4 +23,12 @@ nano .env
 node base.js
 ```
 
+### Features
+This personnal assistant gives you weather and news.
+You can interact with it by voice, saying "Hey assistant" or clicking the button.
 
+Responses are fast using OPENAI Realtime speech to speech API (less than 0.5s)
+
+AI is capable of giving you the news and the weather asking app to give information
+
+For demonstration purposes only
