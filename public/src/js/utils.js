@@ -199,7 +199,7 @@ async function fetchRSSFeed() {
     const rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
 
     try {
-        const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
+        const response = await fetch(rssUrl);
         const data = await response.text();
         articles_dataAI = data;
         const parser = new DOMParser();
