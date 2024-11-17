@@ -1,3 +1,7 @@
+body{
+  overflow: hidden;
+}
+
 .centre {
   height: 5px;
   width: 5px;
@@ -488,7 +492,7 @@
   background-color: var(--color-white);
   overflow: hidden;
   flex-direction: column;
-  padding: 0px 0px;
+  padding: 10px 0px;
   text-align: center;
   font-size: var(--font-size-base);
   color: var(--color-white);
