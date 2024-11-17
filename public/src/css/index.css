@@ -659,7 +659,8 @@ body{
   letter-spacing: normal;
   max-width: 90%;
   max-height: 90%;
-  overflow: auto
+  overflow: auto;
+  top:-20;
 }
 
 @media screen and (max-width: 700px) {
