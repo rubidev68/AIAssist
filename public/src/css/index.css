@@ -660,7 +660,7 @@ body{
   max-width: 90%;
   max-height: 90%;
   overflow: auto;
-  top:-20px;
+  top:-24px;
 }
 
 @media screen and (max-width: 700px) {
