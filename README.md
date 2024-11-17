@@ -3,8 +3,8 @@
 ### Installation
 #### 1.Clone repo
 ```bash
-git clone https://github.com/rubidev68/KAIRA.git
-cd KAIRA
+git clone https://github.com/rubidev68/AIAssist.git
+cd AIAssist
 ```
 
 #### 2.Install dependencies
@@ -15,6 +15,7 @@ npm install
 #### 3. Add OpenAI api key
 ```bash
 nano .env
+#PORT=3000
 #OPENAI_API_KEY=<your-api-key>
 ```
 
