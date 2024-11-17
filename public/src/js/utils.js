@@ -317,7 +317,7 @@ function initPhotoSlider() {
 }
 
 function openAIContainer() {
-    recognition.stop();
+    //recognition.stop();
     var popup = document.getElementById("vocalChatPopup");
     if (!popup) return;
 

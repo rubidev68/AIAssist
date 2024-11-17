@@ -43,6 +43,12 @@ if (weatherContainer) {
 var aIContainer = document.getElementById("aIContainer");
 if (aIContainer) {
     aIContainer.addEventListener("click", function () {
+        try {
+            recognition.stop();
+        }
+        catch (e) {
+            
+        }
         openAIContainer();
     });
 }
