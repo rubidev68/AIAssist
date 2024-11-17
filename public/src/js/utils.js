@@ -195,11 +195,12 @@ function setWeatherIcon(weatherIconStr, weatherDescription) {
 
 
 async function fetchRSSFeed() {
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const rssUrl = 'https://feeds.bbci.co.uk/news/rss.xml';
+    const proxyUrl = 'https://'+window.location.host+'/proxy/';
+    const rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
+    rssUrl = rssUrl.replace(/^https?:\/\/[^/]+/, "");
 
     try {
-        const response = await fetch(rssUrl);
+        const response = await fetch(proxyUrl + rssUrl);
         const data = await response.text();
         articles_dataAI = data;
         const parser = new DOMParser();
