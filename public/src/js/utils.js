@@ -369,7 +369,7 @@ function updateTextWithAnimation(element, newText, append = false) {
 
 function openNewsDetails(url) {
     var url = url.replace(/^https?:\/\/[^/]+/, "");
-    var proxyUrl = 'http://localhost:3000/proxy/';
+    var proxyUrl = window.location.protocol + '//' + window.location.host + '/proxy/';
     var popup = document.getElementById("newsDetailsPopup");
     var iframe = document.getElementById("news-iframe");
 
