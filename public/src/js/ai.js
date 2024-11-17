@@ -239,7 +239,19 @@ async function startAudioProcessing() {
                     isAudioStreamActive = false;
 
                     // Resample the recorded audio buffer to 24000Hz
-                    const audioBufferToResample = audioContext.createBuffer(1, audioBuffer.length, audioContext.sampleRate);
+                    let audioBufferToResample;
+                    try{
+                        audioBufferToResample = audioContext.createBuffer(1, audioBuffer.length, audioContext.sampleRate);
+                    } catch (error){
+                        console.error("User is not speaking.");
+                        updateAIOrderText('Click button to start talking.');
+                        try {
+                            recognition.start();
+                        } catch (error) {
+                            
+                        }
+                        
+                    }
                     audioBufferToResample.copyToChannel(new Float32Array(audioBuffer), 0);
                     const resampledBuffer = await resampleAudio(audioBufferToResample, 24000);
 
