@@ -56,3 +56,31 @@ if (aIContainer) {
 document.getElementById('ai-btn-2').onclick = () => {
     startAudioProcessing();
 };
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.getElementById("loginForm");
+    const loginPopup = document.getElementById("loginPopup");
+    const errorMessage = document.getElementById("errorMessage");
+
+    loginPopup.style.display = "flex";
+    loginPopup.style.zIndex = 100;
+    loginPopup.classList.add('show');
+
+    // Hash du mot de passe (à faire une seule fois et stocker le hash)
+    const storedHashedPassword = '649e96e75a2326aea3682b21bf9960493e0120aae931e764dafd7480eecabca0'; // Remplacez par le hash de votre mot de passe
+
+    loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const password = loginForm.password.value;
+        const hashedPassword = await hashPassword(password);
+
+        // Vérifiez le mot de passe avec le hash stocké
+        if (hashedPassword === storedHashedPassword) {
+            loginPopup.style.display = "none";
+            recognition.start();
+        } else {
+            errorMessage.style.display = "block";
+        }
+    });
+});

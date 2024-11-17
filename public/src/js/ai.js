@@ -31,7 +31,7 @@ recognition.onresult = (event) => {
     }
 };
 
-recognition.start();
+
 
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);

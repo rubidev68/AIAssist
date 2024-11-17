@@ -256,6 +256,18 @@
       </div>
     </div>
 
+    <div id="loginPopup" class="popup-overlay" style="display: block">
+      <div class="login">
+        <h2>Login</h2>
+        <form id="loginForm">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+          <button type="submit">Login</button>
+        </form>
+        <p id="errorMessage" style="color: red; display: none;">Incorrect password</p>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <script src="./src/js/utils.js"></script>
     <script src="./src/js/main.js"></script>

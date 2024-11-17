@@ -923,3 +923,10 @@ body{
   height: 100%;
   border: none
 }
+
+.login {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
