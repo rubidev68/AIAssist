@@ -13,7 +13,13 @@ cd KAIRA
 npm install
 ```
 
-#### 3. Run
+#### 3. Add OpenAI api key
+```bash
+nano .env
+#OPENAI_API_KEY=<your-api-key>
+```
+
+#### 4. Run
 ```bash
 node base.js
 ```
