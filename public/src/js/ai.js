@@ -1,7 +1,7 @@
 let isUserInteracted = false;
 let audioContext;
 let mediaStream;
-const ws = new WebSocket("ws://localhost:3000/api");
+const ws = new WebSocket("ws://"+window.location.host+"/api");
 
 ws.onopen = () => {
     //console.log("WebSocket connection established with the server.");
