@@ -87,7 +87,13 @@ function getUserLocationAndWeather() {
                     }).catch(error => reject(error));
                 },
                 (error) => {
-                    reject(error);
+                    console.log("Error getting location for weather:", error);
+                    const latitude = 49.1837;
+                    const longitude = -0.356;
+                    getWeather(latitude, longitude).then(weather_data => {
+                        weather_dataAI = weather_data;
+                        resolve({ latitude, longitude, weather_data });
+                    }).catch(error => reject(error));
                 }
             );
         } else {
@@ -105,7 +111,14 @@ function getUserLocationAndWeather() {
                     if (error.code === error.PERMISSION_DENIED) {
                         localStorage.setItem('locationPermission', 'denied');
                     }
-                    reject(error);
+                    console.log("Error getting location for weather:", error);
+                    const latitude = 49.1837;
+                    const longitude = -0.356;
+                    getWeather(latitude, longitude).then(weather_data => {
+                        weather_dataAI = weather_data;
+                        resolve({ latitude, longitude, weather_data });
+                    }).catch(error => reject(error));
+                    
                 }
             );
         }
