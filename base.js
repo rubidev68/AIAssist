@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
 import { type } from 'os';
+import cors from 'cors';
 
 import { createProxyMiddleware } from 'http-proxy-middleware';'http-proxy-middleware';
 
@@ -19,6 +20,8 @@ const app = express();
 app.use("/", express.static(path.join(__dirname, 'public')));
 expressWs(app);
 
+app.use(cors());
+
 // Proxy server setup
 app.use('/proxy', createProxyMiddleware({
     target: 'https://www.bbc.com',
@@ -30,6 +33,10 @@ app.use('/proxy', createProxyMiddleware({
         // Supprimer les en-têtes restrictifs
         delete proxyRes.headers['x-frame-options'];
         delete proxyRes.headers['content-security-policy'];
+
+        proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+        proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+        proxyRes.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
     }
 }));
 
