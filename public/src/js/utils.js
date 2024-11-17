@@ -195,8 +195,8 @@ function setWeatherIcon(weatherIconStr, weatherDescription) {
 
 
 async function fetchRSSFeed() {
-    const proxyUrl = 'https://'+window.location.host+'/proxy/';
-    const rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
+    let proxyUrl = 'https://'+window.location.host+'/proxy/';
+    let rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
     rssUrl = rssUrl.replace(/^https?:\/\/[^/]+/, "");
 
     try {
