@@ -860,12 +860,12 @@ body{
 }
 
 .content.slide-out {
-  transform: translateY(-100%);
+  transform: translateY(100%);
   opacity: 0
 }
 
 .content.slide-in {
-  transform: translateY(100%);
+  transform: translateY(-100%);
   opacity: 0;
   position: absolute;
   top: 0;

@@ -195,29 +195,28 @@ function setWeatherIcon(weatherIconStr, weatherDescription) {
 
 
 async function fetchRSSFeed() {
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const proxyUrl = 'https://api.rss2json.com/v1/api.json?rss_url=';
     const rssUrl = 'http://feeds.bbci.co.uk/news/rss.xml';
 
     try {
         const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
-        const data = await response.text();
+        const data = await response.json(); // Changé de .text() à .json()
         articles_dataAI = data;
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data, 'application/xml');
-        return xmlDoc;
+        return data; // Retourne directement l'objet JSON
     } catch (error) {
         console.error('Erreur lors de la récupération du flux RSS:', error);
         return null;
     }
 }
 
-function updateNewsArticles(xmlDoc) {
-    const items = xmlDoc.getElementsByTagName('item');
-    allArticles = Array.from(items).map(item => ({
-        title: item.getElementsByTagName('title')[0].textContent,
-        description: item.getElementsByTagName('description')[0].textContent,
-        link: item.getElementsByTagName('link')[0].textContent,
-        mediaContent: item.getElementsByTagNameNS('*', 'thumbnail'),
+function updateNewsArticles(data) { // Modifié pour accepter l'objet JSON
+    if (!data || !data.items) return;
+
+    allArticles = data.items.map(item => ({
+        title: item.title,
+        description: item.description,
+        link: item.link,
+        mediaContent: item.thumbnail, // Utilise directement l'URL de la miniature
     }));
 
     displayCurrentArticles();
@@ -226,73 +225,57 @@ function updateNewsArticles(xmlDoc) {
 function rollArticles() {
     if (allArticles.length > 0) {
         const containers = document.querySelectorAll('.article-1');
-        
+
         containers.forEach(container => {
-            const oldContent = container.querySelector('.content');
-            const newContent = oldContent.cloneNode(true);
-            
-            // Préparer le nouveau contenu
-            newContent.classList.add('slide-in');
-            container.appendChild(newContent);
-            
-            // Animation de sortie de l'ancien contenu
-            oldContent.classList.add('slide-out');
-            
-            setTimeout(() => {
-                currentArticleIndex = (currentArticleIndex + 4) % allArticles.length;
-                displayCurrentArticles();
-                
-                // Animation d'entrée du nouveau contenu
-                setTimeout(() => {
-                    newContent.classList.remove('slide-in');
-                    //newContent.classList.add('active');
-                    container.removeChild(oldContent);
-                }, 50);
-            }, 500);
+            const content = container.querySelector('.content');
+            content.classList.add('slide-out');
         });
+
+        setTimeout(() => {
+            currentArticleIndex = (currentArticleIndex + 4) % allArticles.length;
+
+            containers.forEach(container => {
+                const content = container.querySelector('.content');
+                content.classList.remove('slide-out');
+                content.classList.add('slide-in');
+            });
+
+            displayCurrentArticles();
+
+            requestAnimationFrame(() => {
+                containers.forEach(container => {
+                    const content = container.querySelector('.content');
+                    content.classList.remove('slide-in');
+                });
+            });
+        }, 500);
     }
 }
 
 function displayCurrentArticles() {
-    for (let i = 0; i < 4; i++) {
-        const articleIndex = (currentArticleIndex + i) % allArticles.length;
-        const article = allArticles[articleIndex];
+    const containers = document.querySelectorAll('.article-1');
 
+    containers.forEach((container, index) => {
+        
+        const article = allArticles[currentArticleIndex + index];
         if (article) {
-            const articleContainer = document.getElementById(`article${i + 1}Container`);
-            if (articleContainer) {
-                const content = articleContainer.querySelector('.content');
-                const titleElement = content.querySelector('h3');
-                const descElement = content.querySelector('.content > div');
+            // Mise à jour des sélecteurs pour correspondre aux classes HTML
+            const titleElement = container.querySelector('.article-title');
+            const descElement = container.querySelector('.article-content');
+           
 
+            if (titleElement && descElement) {
                 titleElement.textContent = article.title;
+                descElement.textContent = article.description;
 
-                const imageUrl = article.mediaContent.length > 0 ?
-                    article.mediaContent[0].getAttribute('url') : null;
-
-                // Mise à jour du background avec transition
-                if (imageUrl) {
-                    articleContainer.style.backgroundImage = `url(${imageUrl})`;
+                if (article.mediaContent) {
+                    container.style.backgroundImage = `url(${article.mediaContent})`;
                 }
 
-                if (descElement) {
-                    const containerHeight = articleContainer.clientHeight;
-                    const titleHeight = titleElement.clientHeight;
-                    const availableSpace = containerHeight - titleHeight - 45;
-
-                    if (availableSpace >= 40) {
-                        descElement.textContent = article.description;
-                        descElement.style.display = 'block';
-                    } else {
-                        descElement.style.display = 'none';
-                    }
-                }
-
-                // Mettre à jour le lien
-                articleContainer.onclick = () => openNewsDetails(article.link);
+                container.onclick = () => openNewsDetails(article.link);
             }
         }
-    }
+    });
 }
 
 async function updateNews() {

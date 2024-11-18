@@ -10,7 +10,7 @@ setInterval(computeWeather, 30 * 60 * 1000);
 
 updateNews();
 setInterval(updateNews, 60 * 60 * 1000); 
-setInterval(rollArticles, 60 * 1000);
+setInterval(rollArticles, 10000);
 
 document.addEventListener('DOMContentLoaded', initPhotoSlider);
 
