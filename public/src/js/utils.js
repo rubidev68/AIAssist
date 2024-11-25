@@ -224,18 +224,19 @@ function updateNewsArticles(data) { // Modifié pour accepter l'objet JSON
 
 function rollArticles() {
     if (allArticles.length > 0) {
-        const containers = document.querySelectorAll('.article-1');
+        const containers = document.querySelectorAll('.article-1, .article-1-small');
 
         containers.forEach(container => {
-            const content = container.querySelector('.content');
+            const content = container.querySelector('.content, .content-small');
             content.classList.add('slide-out');
         });
 
         setTimeout(() => {
-            currentArticleIndex = (currentArticleIndex + 4) % allArticles.length;
+            currentArticleIndex = (currentArticleIndex + containers.length) % allArticles.length;
 
             containers.forEach(container => {
-                const content = container.querySelector('.content');
+                console.log(container);
+                const content = container.querySelector('.content, .content-small');
                 content.classList.remove('slide-out');
                 content.classList.add('slide-in');
             });
@@ -244,7 +245,7 @@ function rollArticles() {
 
             requestAnimationFrame(() => {
                 containers.forEach(container => {
-                    const content = container.querySelector('.content');
+                    const content = container.querySelector('.content, .content-small');
                     content.classList.remove('slide-in');
                 });
             });
@@ -253,23 +254,46 @@ function rollArticles() {
 }
 
 function displayCurrentArticles() {
-    const containers = document.querySelectorAll('.article-1');
+    const containers = document.querySelectorAll('.article-1, .article-1-small');
 
     containers.forEach((container, index) => {
-        
         const article = allArticles[currentArticleIndex + index];
         if (article) {
-            // Mise à jour des sélecteurs pour correspondre aux classes HTML
             const titleElement = container.querySelector('.article-title');
             const descElement = container.querySelector('.article-content');
-           
 
+            // Préserver les classes et propriétés existantes
+            if (container.classList.contains('article-1-small')) {
+                // Ajouter classes spécifiques pour les articles verticaux
+                if (index === 0) {
+                    container.classList.add('article-top');
+                } else {
+                    container.classList.add('article-bottom');
+                }
+            }
+
+            // Ajouter l'overlay s'il n'existe pas
+            if (!container.querySelector('.overlay')) {
+                const overlay = document.createElement('div');
+                overlay.classList.add('overlay');
+                container.appendChild(overlay);
+            }
+
+            // Mise à jour du contenu
             if (titleElement && descElement) {
                 titleElement.textContent = article.title;
                 descElement.textContent = article.description;
 
                 if (article.mediaContent) {
+                    
                     container.style.backgroundImage = `url(${article.mediaContent})`;
+                }
+
+                // S'assurer que le content est bien positionné
+                const content = container.querySelector('.content');
+                if (content) {
+                    content.style.position = 'relative';
+                    content.style.zIndex = '2';
                 }
 
                 container.onclick = () => openNewsDetails(article.link);

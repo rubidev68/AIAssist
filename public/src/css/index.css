@@ -241,7 +241,8 @@ body{
 
 .date-p {
   width: 100%;
-  margin: 0
+  margin: 0;
+  color: var(--color-dimgray);
 }
 
 .date {
@@ -929,4 +930,131 @@ body{
   padding: 20px;
   border-radius: 5px;
   text-align: center;
+}
+
+.list-title {
+  text-decoration: none;
+  width: 116px;
+  height: 36px;
+  position: relative;
+  line-height: 25px;
+  font-weight: 500;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.this-is-task,
+.this-is-task1 {
+  margin: 0;
+}
+
+.this-is-task2 {
+  text-decoration: line-through;
+  color: rgba(74, 84, 110, 0.5);
+}
+
+.this-is-task-done {
+  margin: 0;
+}
+
+.task-list {
+  position: relative;
+  font-size: var(--font-size-lg);
+  line-height: 30px;
+  font-weight: 500;
+}
+
+.tasks {
+  flex: 0.8746;
+  border-radius: var(--br-3xs);
+  background-color: var(--color-aliceblue);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 15px var(--padding-xl) 242px;
+  box-sizing: border-box;
+  gap: var(--gap-smi);
+  min-width: 273px;
+  color: #4A546F;
+}
+
+
+.website {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+
+.website {
+  max-width: 100%;
+  flex-direction: row;
+  padding: 0 var(--padding-12xs) 0 0;
+  box-sizing: border-box;
+  gap: var(--gap-9xl);
+  line-height: normal;
+  letter-spacing: normal;
+  text-align: left;
+  font-size: 24px;
+  color: var(--color-dimgray-100);
+  font-family: var(--font-roboto);
+}
+
+.news-small-vertical {
+  flex: 1;
+  border-radius: var(--br-3xs);
+  background-color: var(--color-aliceblue);
+  flex-direction: column;
+  min-width: 273px;
+  font-size: var(--font-size-4xl);
+  color: var(--color-white);
+  height: 396px;
+  display: flex;
+  overflow: hidden;
+}
+
+.article-1-small {
+  height: 50%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+}
+
+.article-1-small .content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--padding-base);
+}
+
+.article-1-small .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
+  background-size: 100% 100%;
+
+  z-index: 1;
+}
+
+.article-top {
+  border-radius: var(--br-3xs) var(--br-3xs) 0 0;
+}
+
+.article-bottom {
+  border-radius: 0 0 var(--br-3xs) var(--br-3xs);
 }
